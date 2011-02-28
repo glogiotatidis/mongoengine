@@ -339,7 +339,7 @@ class ListField(BaseField):
 
         if isinstance(self.field, ReferenceField):
             referenced_type = self.field.document_type
-            # Get value from document instance if available 
+            # Get value from document instance if available
             value_list = instance._data.get(self.name)
             if value_list:
                 deref_list = []
@@ -599,6 +599,7 @@ class GridFSProxy(object):
 
     def __init__(self, grid_id=None):
         self.fs = gridfs.GridFS(_get_db())  # Filesystem instance
+        self.gridout_instance = None        # File instance
         self.newfile = None                 # Used for partial writes
         self.grid_id = grid_id              # Store GridFS id for file
 
@@ -612,13 +613,16 @@ class GridFSProxy(object):
         return self
 
     def get(self, id=None):
-        if id:
-            self.grid_id = id
-        try:
-            return self.fs.get(id or self.grid_id)
-        except:
-            # File has been deleted
-            return None
+        if not id and self.gridout_instance:
+            return self.gridout_instance
+        else:
+            if id:
+                self.grid_id = id
+            try:
+                return self.fs.get(id or self.grid_id)
+            except:
+                # File has been deleted
+                return None
 
     def new_file(self, **kwargs):
         self.newfile = self.fs.new_file(**kwargs)
@@ -643,7 +647,7 @@ class GridFSProxy(object):
         if not self.newfile:
             self.new_file()
             self.grid_id = self.newfile._id
-        self.newfile.writelines(lines) 
+        self.newfile.writelines(lines)
 
     def read(self):
         try:
