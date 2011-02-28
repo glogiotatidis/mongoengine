@@ -649,9 +649,9 @@ class GridFSProxy(object):
             self.grid_id = self.newfile._id
         self.newfile.writelines(lines)
 
-    def read(self):
+    def read(self, size=-1):
         try:
-            return self.get().read()
+            return self.get().read(size)
         except:
             return None
 
