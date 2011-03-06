@@ -619,7 +619,8 @@ class GridFSProxy(object):
             if id:
                 self.grid_id = id
             try:
-                return self.fs.get(id or self.grid_id)
+                self.gridout_instance = self.fs.get(id or self.grid_id)
+                return self.gridout_instance
             except:
                 # File has been deleted
                 return None
@@ -627,6 +628,7 @@ class GridFSProxy(object):
     def new_file(self, **kwargs):
         self.newfile = self.fs.new_file(**kwargs)
         self.grid_id = self.newfile._id
+        self.gridout_instance = None
 
     def put(self, file, **kwargs):
         if self.grid_id:
@@ -649,11 +651,18 @@ class GridFSProxy(object):
             self.grid_id = self.newfile._id
         self.newfile.writelines(lines)
 
-    def read(self):
+    def read(self, size=-1):
         try:
-            return self.get().read()
+            return self.get().read(size)
         except:
             return None
+
+    def seek(self, pos, whence=gridfs.grid_file._SEEK_SET):
+        self.get().seek(pos, whence)
+        return 0
+
+    def tell(self):
+        return self.get().tell()
 
     def delete(self):
         # Delete file from GridFS, FileField still remains
