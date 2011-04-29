@@ -92,6 +92,15 @@ class User(Document):
         user.save()
         return user
 
+    @classmethod
+    def create_superuser(cls, username, email, password):
+        u = cls.create_user(username, email, password)
+        u.is_staff = True
+        u.is_active = True
+        u.is_superuser = True
+        u.save()
+        return u
+
     def get_and_delete_messages(self):
         return []
 
