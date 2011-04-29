@@ -70,7 +70,7 @@ class User(Document):
         return hash == get_hexdigest(algo, salt, raw_password)
 
     @classmethod
-    def create_user(cls, username, password, email=None):
+    def create_user(cls, username, email, password=None):
         """Create (and save) a new user with the given username, password and
         email address.
         """
@@ -78,15 +78,16 @@ class User(Document):
 
         # Normalize the address by lowercasing the domain part of the email
         # address.
-        if email is not None:
-            try:
-                email_name, domain_part = email.strip().split('@', 1)
-            except ValueError:
-                pass
-            else:
-                email = '@'.join([email_name, domain_part.lower()])
+        try:
+            email_name, domain_part = email.strip().split('@', 1)
+        except ValueError:
+            pass
+        else:
+            email = '@'.join([email_name, domain_part.lower()])
 
-        user = User(username=username, email=email, date_joined=now)
+        user = User(username=username, email=email, is_staff=False,
+                    is_active=True, is_superuser=False, last_login=now,
+                    date_joined=now)
         user.set_password(password)
         user.save()
         return user
